@@ -222,3 +222,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--secondary); box-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+.logo-img {
+  height: 40px;
+  width: auto;
+}
