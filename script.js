@@ -1,282 +1,121 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+document.addEventListener("DOMContentLoaded", () => {
+  const menuToggle = document.querySelector(".menu-toggle");
+  const mainNav = document.querySelector(".main-nav");
+  const navLinks = document.querySelectorAll(".nav-link");
+  const sections = document.querySelectorAll("main section[id]");
+  const backToTop = document.querySelector(".back-to-top");
+  const contactForm = document.querySelector("#contactForm");
+  const formStatus = document.querySelector(".form-status");
 
-  <title>DD Prime Solution | Digital & Business Support Services in India</title>
-  <meta name="description" content="DD Prime Solution provides website development, digital marketing, documentation assistance, business support and online application assistance for businesses across India.">
-  <meta name="keywords" content="digital services India, business support India, website design, digital marketing, GST assistance, MSME Udyam assistance, FSSAI application support, Google Business Profile">
-  <meta name="author" content="DD Prime Solution">
-  <meta name="theme-color" content="#0B1F3A">
+  // Mobile hamburger menu
+  menuToggle.addEventListener("click", () => {
+    const isOpen = mainNav.classList.toggle("open");
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
+    menuToggle.setAttribute("aria-label", isOpen ? "Close navigation menu" : "Open navigation menu");
+  });
 
-  <meta property="og:title" content="DD Prime Solution | Smart Digital and Business Solutions">
-  <meta property="og:description" content="Practical digital, documentation and business support services for startups, professionals, shop owners and small businesses.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.ddprime.in">
-  <meta property="og:image" content="https://www.ddprime.in/assets/og-image.jpg">
+  // Close mobile menu after selecting a navigation link
+  navLinks.forEach(link => {
+    link.addEventListener("click", () => {
+      mainNav.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      menuToggle.setAttribute("aria-label", "Open navigation menu");
+    });
+  });
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  // Active navigation link based on the visible section
+  const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.toggle("active", link.getAttribute("href") === `#${entry.target.id}`);
+        });
+      }
+    });
+  }, { rootMargin: "-30% 0px -60% 0px" });
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "DD Prime Solution",
-    "url": "https://www.ddprime.in",
-    "telephone": "+917597616454",
-    "email": "ddprimesolution@gmail.com",
-    "description": "Digital services, business support and documentation assistance for startups, shop owners, freelancers, professionals and small businesses in India.",
-    "areaServed": {
-      "@type": "Country",
-      "name": "India"
-    },
-    "serviceType": [
-      "Website Design and Development",
-      "Digital Marketing",
-      "Business Documentation Assistance",
-      "Online Application Support",
-      "Business Consultation"
-    ]
+  sections.forEach(section => sectionObserver.observe(section));
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-question").forEach(question => {
+    question.addEventListener("click", () => {
+      const isExpanded = question.getAttribute("aria-expanded") === "true";
+
+      document.querySelectorAll(".faq-question").forEach(item => {
+        item.setAttribute("aria-expanded", "false");
+        item.nextElementSibling.style.maxHeight = null;
+      });
+
+      if (!isExpanded) {
+        question.setAttribute("aria-expanded", "true");
+        question.nextElementSibling.style.maxHeight =
+          `${question.nextElementSibling.scrollHeight}px`;
+      }
+    });
+  });
+
+  // Scroll reveal animation
+  const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll(".reveal").forEach(element => revealObserver.observe(element));
+
+  // Back-to-top button
+  window.addEventListener("scroll", () => {
+    backToTop.classList.toggle("show", window.scrollY > 500);
+  }, { passive: true });
+
+  backToTop.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Frontend-only contact form validation
+  contactForm.addEventListener("submit", event => {
+    event.preventDefault();
+
+    const name = contactForm.elements.name.value.trim();
+    const phone = contactForm.elements.phone.value.trim();
+    const email = contactForm.elements.email.value.trim();
+    const service = contactForm.elements.service.value;
+    const message = contactForm.elements.message.value.trim();
+
+    const phonePattern = /^[+()\d\s-]{8,}$/;
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!name || !phone || !email || !service || !message) {
+      showFormMessage("Please complete all fields before submitting.", "error");
+      return;
+    }
+
+    if (!phonePattern.test(phone)) {
+      showFormMessage("Please enter a valid phone number.", "error");
+      return;
+    }
+
+    if (!emailPattern.test(email)) {
+      showFormMessage("Please enter a valid email address.", "error");
+      return;
+    }
+
+    showFormMessage(
+      "Thank you! Your enquiry has been prepared successfully. Please connect the form to Formspree, Netlify Forms or a backend to receive real submissions.",
+      "success"
+    );
+
+    contactForm.reset();
+  });
+
+  function showFormMessage(message, type) {
+    formStatus.textContent = message;
+    formStatus.className = `form-status ${type}`;
   }
-  </script>
-</head>
 
-<body>
-  <header class="site-header" id="top">
-    <div class="container nav-container">
-      <a class="logo" href="#home" aria-label="DD Prime Solution home">
-        <span class="logo-mark">DD</span>
-        <span>PRIME<span class="logo-dot">.</span></span>
-      </a>
-
-      <button class="menu-toggle" aria-label="Open navigation menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <nav class="main-nav" aria-label="Main navigation">
-        <a class="nav-link active" href="#home">Home</a>
-        <a class="nav-link" href="#about">About</a>
-        <a class="nav-link" href="#services">Services</a>
-        <a class="nav-link" href="#process">Process</a>
-        <a class="nav-link" href="#pricing">Pricing</a>
-        <a class="nav-link" href="#faq">FAQ</a>
-        <a class="nav-link" href="#contact">Contact</a>
-      </nav>
-
-      <a class="header-cta" href="#contact">Let's Talk <span>↗</span></a>
-    </div>
-  </header>
-
-  <main>
-    <section class="hero section" id="home">
-      <div class="hero-glow"></div>
-      <div class="container hero-grid">
-        <div class="hero-content reveal">
-          <span class="eyebrow light-eyebrow">Digital clarity. Business growth.</span>
-          <h1>Smart Digital and Business Solutions for <span>Growing Businesses</span></h1>
-          <p class="hero-text">
-            Practical digital services, business support and documentation assistance
-            to help your business move forward with confidence.
-          </p>
-
-          <div class="hero-actions">
-            <a href="#contact" class="btn btn-primary">Get Free Consultation <span>→</span></a>
-            <a href="https://wa.me/917597616454?text=Hello%20DD%20Prime%20Solution%2C%20I%20want%20to%20know%20more%20about%20your%20services." class="btn btn-whatsapp" target="_blank" rel="noopener">
-              <span class="whatsapp-icon">◉</span> Chat on WhatsApp
-            </a>
-          </div>
-
-          <div class="hero-proof">
-            <div class="proof-avatars"><span>DD</span><span>PS</span><span>+</span></div>
-            <div><strong>Built for ambitious businesses</strong><small>Startups · Professionals · Small businesses</small></div>
-          </div>
-        </div>
-
-        <div class="hero-visual reveal">
-          <div class="visual-card dashboard-card">
-            <div class="card-top"><span class="status-dot"></span><span>Business growth dashboard</span><span>•••</span></div>
-            <div class="chart-area">
-              <div class="chart-label"><small>Digital visibility</small><strong>+84.6%</strong></div>
-              <svg viewBox="0 0 400 170" role="img" aria-label="Decorative upward growth chart">
-                <defs>
-                  <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#F4B942" stop-opacity=".35"/>
-                    <stop offset="100%" stop-color="#F4B942" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0 145 C35 132, 40 145, 70 112 S110 125, 140 94 S180 103, 210 75 S245 95, 280 52 S325 67, 400 15 V170 H0Z" fill="url(#chartFill)"/>
-                <path d="M0 145 C35 132, 40 145, 70 112 S110 125, 140 94 S180 103, 210 75 S245 95, 280 52 S325 67, 400 15" fill="none" stroke="#F4B942" stroke-width="4"/>
-              </svg>
-            </div>
-            <div class="mini-stats"><span><small>Leads</small><strong>248</strong></span><span><small>Reach</small><strong>18.4K</strong></span><span><small>Projects</small><strong>32+</strong></span></div>
-          </div>
-          <div class="floating-badge badge-one">✦ Smart support</div>
-          <div class="floating-badge badge-two">✓ Clear process</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="trust-strip">
-      <div class="container trust-items">
-        <span>Helping businesses build a stronger digital presence</span>
-        <span>✦</span><span>Digital-first support</span><span>✦</span><span>India-focused assistance</span>
-      </div>
-    </section>
-
-    <section class="section" id="about">
-      <div class="container about-grid">
-        <div class="about-image reveal">
-          <div class="image-placeholder" role="img" aria-label="Placeholder for DD Prime Solution team or workspace image">
-            <span>DD PRIME</span>
-            <small>Replace with your business image</small>
-          </div>
-          <div class="experience-card"><strong>01</strong><span>Partnering with businesses<br>at every growth stage</span></div>
-        </div>
-        <div class="about-content reveal">
-          <span class="eyebrow">About DD Prime Solution</span>
-          <h2>Your reliable partner for digital and business support.</h2>
-          <p>DD Prime Solution helps startups, shop owners, freelancers, professionals and small businesses handle essential digital tasks and business support requirements from one convenient place.</p>
-          <p>From building your online presence to supporting documentation and online applications, we focus on simple communication, practical solutions and dependable execution.</p>
-          <div class="check-list">
-            <div>✓ Clear, practical guidance</div>
-            <div>✓ Support tailored to your business</div>
-            <div>✓ Professional and transparent communication</div>
-          </div>
-          <a href="#services" class="text-link">Explore our services <span>→</span></a>
-        </div>
-      </div>
-    </section>
-
-    <section class="section light-section" id="services">
-      <div class="container">
-        <div class="section-heading centered reveal">
-          <span class="eyebrow">What we do</span>
-          <h2>Solutions that keep your business moving</h2>
-          <p>Flexible support for the digital, documentation and business needs that matter most.</p>
-        </div>
-
-        <div class="service-grid">
-          <article class="service-card reveal"><div class="service-icon">▦</div><h3>Website Design and Development</h3><p>Responsive, professional websites designed to help your business build trust online.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">⌖</div><h3>Google Business Profile Setup</h3><p>Get started with a stronger local presence and a well-organised business profile.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">↗</div><h3>Digital Marketing</h3><p>Practical digital marketing support focused on visibility, engagement and growth.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">◎</div><h3>Social Media Management</h3><p>Consistent content and profile support to keep your brand active and professional.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">✦</div><h3>Logo and Graphic Design</h3><p>Clean, memorable visual assets for your brand, campaigns and business materials.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">▤</div><h3>Business Registration Assistance</h3><p>Organised application support for common business registration requirements.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">✓</div><h3>GST, MSME/Udyam and FSSAI Assistance</h3><p>Documentation and application support to help you navigate online processes.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">☷</div><h3>Online Documentation Support</h3><p>Help with preparing, organising and submitting online documentation.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">◌</div><h3>Business Consultation</h3><p>Practical direction for your next digital or operational business step.</p><a href="#contact">Learn more →</a></article>
-          <article class="service-card reveal"><div class="service-icon">∞</div><h3>Monthly Digital Support Plans</h3><p>Ongoing assistance for businesses that need reliable digital support every month.</p><a href="#contact">Learn more →</a></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section why-section">
-      <div class="container why-grid">
-        <div class="why-content reveal"><span class="eyebrow">Why choose us</span><h2>Less confusion. More progress.</h2><p>We make digital and business support easier to understand and easier to act on, so you can spend more time focusing on your customers.</p><a href="#contact" class="btn btn-dark">Start a conversation <span>→</span></a></div>
-        <div class="benefit-grid">
-          <div class="benefit reveal"><span>01</span><h3>Simple communication</h3><p>Clear updates without unnecessary jargon.</p></div>
-          <div class="benefit reveal"><span>02</span><h3>Flexible solutions</h3><p>Services shaped around your priorities.</p></div>
-          <div class="benefit reveal"><span>03</span><h3>Practical execution</h3><p>Focused support from planning to completion.</p></div>
-          <div class="benefit reveal"><span>04</span><h3>One dependable partner</h3><p>Digital and business support in one place.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section light-section" id="process">
-      <div class="container">
-        <div class="section-heading centered reveal"><span class="eyebrow">How it works</span><h2>A straightforward process</h2><p>Getting started is simple, focused and transparent.</p></div>
-        <div class="process-grid">
-          <div class="process-step reveal"><span>01</span><div class="process-line"></div><h3>Tell us what you need</h3><p>Share your business goals, requirements and current challenges.</p></div>
-          <div class="process-step reveal"><span>02</span><div class="process-line"></div><h3>Get a clear plan</h3><p>We recommend the most suitable service or support approach.</p></div>
-          <div class="process-step reveal"><span>03</span><div class="process-line"></div><h3>We get to work</h3><p>Our team handles the agreed tasks with regular communication.</p></div>
-          <div class="process-step reveal"><span>04</span><div class="process-line"></div><h3>Move forward</h3><p>Review the outcome and continue with support when needed.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section pricing-section" id="pricing">
-      <div class="container">
-        <div class="section-heading centered reveal"><span class="eyebrow">Simple options</span><h2>Support that fits your stage</h2><p>Sample plans to help you choose a starting point. Final pricing depends on your requirements.</p></div>
-        <div class="pricing-grid">
-          <article class="price-card reveal"><span class="plan-name">Basic</span><h3>Starting Point</h3><p>For individuals and new businesses establishing their presence.</p><ul><li>One core digital service</li><li>Initial consultation</li><li>Basic documentation guidance</li><li>Email/WhatsApp support</li></ul><a href="#contact" class="btn btn-outline">Discuss Basic</a></article>
-          <article class="price-card featured reveal"><span class="popular-tag">Popular</span><span class="plan-name">Standard</span><h3>Growth Support</h3><p>For businesses ready to improve their digital visibility and operations.</p><ul><li>Combination of selected services</li><li>Business profile support</li><li>Digital presence guidance</li><li>Priority communication</li></ul><a href="#contact" class="btn btn-primary">Discuss Standard</a></article>
-          <article class="price-card reveal"><span class="plan-name">Premium</span><h3>Ongoing Partner</h3><p>For businesses seeking continuous digital and business assistance.</p><ul><li>Monthly digital support</li><li>Multiple service categories</li><li>Regular progress reviews</li><li>Dedicated support approach</li></ul><a href="#contact" class="btn btn-outline">Discuss Premium</a></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section portfolio-section">
-      <div class="container">
-        <div class="section-heading split-heading reveal"><div><span class="eyebrow">Work samples</span><h2>Ideas made practical</h2></div><p>Replace these placeholders with your completed projects, campaigns or business support work.</p></div>
-        <div class="portfolio-grid">
-          <div class="portfolio-card portfolio-large reveal"><div class="portfolio-placeholder">Website Project<br><small>Image placeholder</small></div><div><span>Web design</span><h3>Professional online presence</h3></div></div>
-          <div class="portfolio-card reveal"><div class="portfolio-placeholder purple">Brand Identity<br><small>Image placeholder</small></div><div><span>Graphic design</span><h3>Distinctive visual identity</h3></div></div>
-          <div class="portfolio-card reveal"><div class="portfolio-placeholder gold">Local Visibility<br><small>Image placeholder</small></div><div><span>Business support</span><h3>Better local discoverability</h3></div></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section testimonials-section">
-      <div class="container">
-        <div class="section-heading centered reveal"><span class="eyebrow">Client feedback</span><h2>Testimonials coming soon</h2><p>Use this area for verified customer feedback after receiving permission to publish it.</p></div>
-        <div class="testimonial-placeholder reveal"><span>“</span><p>Customer testimonials will be added here with consent.</p><small>— Testimonial placeholder</small></div>
-      </div>
-    </section>
-
-    <section class="section faq-section light-section" id="faq">
-      <div class="container faq-grid">
-        <div class="section-heading reveal"><span class="eyebrow">Have questions?</span><h2>Frequently asked questions</h2><p>Here are answers to common questions about our services and working process.</p><a href="#contact" class="text-link">Ask your question <span>→</span></a></div>
-        <div class="faq-list reveal">
-          <div class="faq-item"><button class="faq-question" aria-expanded="false">Who can use your services?<span>+</span></button><div class="faq-answer"><p>Our services are designed for startups, shop owners, freelancers, professionals and small businesses.</p></div></div>
-          <div class="faq-item"><button class="faq-question" aria-expanded="false">Do you provide government registrations directly?<span>+</span></button><div class="faq-answer"><p>We provide documentation assistance and application support. We do not claim to be a government officer, lawyer or CA.</p></div></div>
-          <div class="faq-item"><button class="faq-question" aria-expanded="false">Can I request a customised package?<span>+</span></button><div class="faq-answer"><p>Yes. Contact us with your requirements and we can discuss a suitable combination of services.</p></div></div>
-          <div class="faq-item"><button class="faq-question" aria-expanded="false">How do I get started?<span>+</span></button><div class="faq-answer"><p>Send an enquiry through the contact form, call us or start a WhatsApp conversation.</p></div></div>
-          <div class="faq-item"><button class="faq-question" aria-expanded="false">Do you offer ongoing support?<span>+</span></button><div class="faq-answer"><p>Yes. Monthly digital support plans are available based on your business needs.</p></div></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section contact-section" id="contact">
-      <div class="container contact-grid">
-        <div class="contact-content reveal"><span class="eyebrow">Let's work together</span><h2>Have a business goal in mind?</h2><p>Tell us what you need and we will get back to you with a practical next step.</p>
-          <div class="contact-details">
-            <a href="tel:+917597616454"><span>☎</span><div><small>Call us</small><strong>+91 7597616454</strong></div></a>
-            <a href="mailto:ddprimesolution@gmail.com"><span>✉</span><div><small>Email us</small><strong>ddprimesolution@gmail.com</strong></div></a>
-            <a href="https://wa.me/917597616454?text=Hello%20DD%20Prime%20Solution%2C%20I%20want%20to%20know%20more%20about%20your%20services." target="_blank" rel="noopener"><span>◉</span><div><small>WhatsApp</small><strong>Start a conversation</strong></div></a>
-          </div>
-        </div>
-        <form class="contact-form reveal" id="contactForm" novalidate>
-          <div class="form-row"><label>Full Name<input type="text" name="name" required placeholder="Your name"></label><label>Phone Number<input type="tel" name="phone" required placeholder="+91"></label></div>
-          <label>Email<input type="email" name="email" required placeholder="you@example.com"></label>
-          <label>Select Service<select name="service" required><option value="">Choose a service</option><option>Website Design and Development</option><option>Digital Marketing</option><option>Social Media Management</option><option>Business Registration Assistance</option><option>GST, MSME/Udyam and FSSAI Assistance</option><option>Online Documentation Support</option><option>Business Consultation</option><option>Other</option></select></label>
-          <label>Message<textarea name="message" rows="4" required placeholder="Tell us briefly about your requirement"></textarea></label>
-          <button class="btn btn-primary submit-btn" type="submit">Send Enquiry <span>→</span></button>
-          <p class="form-status" role="status"></p>
-          <!-- Frontend validation is included. Connect Formspree, Netlify Forms or a backend to receive real submissions. -->
-        </form>
-      </div>
-    </section>
-
-    <section class="final-cta">
-      <div class="container final-cta-inner"><div><span class="eyebrow light-eyebrow">Ready when you are</span><h2>Make your next business step a smart one.</h2></div><a href="#contact" class="btn btn-gold">Get Free Consultation <span>→</span></a></div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container footer-grid">
-      <div><a class="logo footer-logo" href="#home"><span class="logo-mark">DD</span><span>PRIME<span class="logo-dot">.</span></span></a><p>Smart digital and business solutions for growing businesses in India.</p></div>
-      <div><h3>Quick links</h3><a href="#about">About us</a><a href="#services">Services</a><a href="#pricing">Pricing</a><a href="#contact">Contact</a></div>
-      <div><h3>Services</h3><a href="#services">Website Development</a><a href="#services">Digital Marketing</a><a href="#services">Documentation Support</a><a href="#services">Business Consultation</a></div>
-      <div><h3>Contact</h3><a href="tel:+917597616454">+91 7597616454</a><a href="mailto:ddprimesolution@gmail.com">ddprimesolution@gmail.com</a><span>India</span></div>
-    </div>
-    <div class="container footer-bottom"><span>© <span id="currentYear"></span> DD Prime Solution. All rights reserved.</span><span>Digital services · Business support · Documentation assistance</span></div>
-  </footer>
-
-  <button class="back-to-top" aria-label="Back to top">↑</button>
-  <script src="script.js"></script>
-</body>
-</html>
+  // Automatically display the current year
+  document.querySelector("#currentYear").textContent = new Date().getFullYear();
+});
