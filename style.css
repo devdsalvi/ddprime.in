@@ -1017,3 +1017,21 @@ textarea:focus {
     padding: 25px 20px;
   }
 }
+.brand-logo {
+  display: block;
+  height: 52px;
+  width: auto;
+  max-width: 210px;
+  object-fit: contain;
+}
+
+.brand-light .brand-logo {
+  filter: brightness(0) invert(1);
+}
+
+@media (max-width: 680px) {
+  .brand-logo {
+    height: 44px;
+    max-width: 180px;
+  }
+}
