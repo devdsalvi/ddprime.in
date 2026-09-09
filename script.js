@@ -1,108 +1,139 @@
-/**
- * DD Prime Solutions – Vanilla JS
- * Mobile menu & FAQ accordion toggles
- * Accessibility-first, framework-free
- */
+(function () {
+  "use strict";
 
-document.addEventListener('DOMContentLoaded', () => {
-    /* -------------------------------------------------
-       Mobile Menu Toggle
-       ------------------------------------------------- */
-    const menuToggle = document.querySelector('.menu-toggle');
-    const navLinks = document.getElementById('navLinks');
+  /* ---------- Footer year ---------- */
+  var yearEl = document.getElementById("year");
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    if (menuToggle && navLinks) {
-        menuToggle.addEventListener('click', () => {
-            const isOpen = navLinks.getAttribute('data-open') === 'true';
-            navLinks.setAttribute('data-open', !isOpen);
-            menuToggle.setAttribute('aria-expanded', !isOpen);
-            menuToggle.innerHTML = isOpen ? '☰' : '×';
+  /* ---------- Header scroll state ---------- */
+  var header = document.getElementById("site-header");
+  function onScroll() {
+    if (!header) return;
+    header.classList.toggle("is-scrolled", window.scrollY > 8);
+  }
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
 
-            // Prevent page scroll when menu is open
-            if (!isOpen) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-        });
-
-        // Close menu when a nav link is clicked
-        navLinks.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.setAttribute('data-open', 'false');
-                menuToggle.setAttribute('aria-expanded', 'false');
-                menuToggle.innerHTML = '☰';
-                document.body.style.overflow = '';
-            });
-        });
-    }
-
-    /* -------------------------------------------------
-       FAQ Accordion Toggle
-       ------------------------------------------------- */
-    const faqQuestions = document.querySelectorAll('.faq-question');
-
-    faqQuestions.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const item = btn.parentElement;
-            const isActive = item.classList.contains('active');
-
-            // Toggle current item
-            item.classList.toggle('active', !isActive);
-            btn.setAttribute('aria-expanded', !isActive);
-
-            // Optional: close all other items (keep only one open)
-            // document.querySelectorAll('.faq-item.active').forEach(other => {
-            //     if (other !== item) {
-            //         other.classList.remove('active');
-            //         other.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-            //     }
-            // });
-        });
+  /* ---------- Mobile nav toggle ---------- */
+  var navToggle = document.getElementById("nav-toggle");
+  var mainNav = document.getElementById("main-nav");
+  if (navToggle && mainNav) {
+    navToggle.addEventListener("click", function () {
+      var isOpen = mainNav.classList.toggle("is-open");
+      navToggle.setAttribute("aria-expanded", String(isOpen));
+      navToggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
+      document.body.style.overflow = isOpen ? "hidden" : "";
     });
 
-    /* -------------------------------------------------
-       Smooth Scroll for Anchor Links
-       ------------------------------------------------- */
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-        });
+    mainNav.querySelectorAll("a").forEach(function (link) {
+      link.addEventListener("click", function () {
+        mainNav.classList.remove("is-open");
+        navToggle.setAttribute("aria-expanded", "false");
+        navToggle.setAttribute("aria-label", "Open menu");
+        document.body.style.overflow = "";
+      });
     });
+  }
 
-    /* -------------------------------------------------
-       Form Submission Feedback
-       ------------------------------------------------- */
-    const form = document.querySelector('.contact-form');
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Basic validation + feedback
-            const inputs = form.querySelectorAll('input[required], textarea[required');
-            let valid = true;
+  /* ---------- FAQ accordion ---------- */
+  var faqItems = document.querySelectorAll(".faq-item");
+  faqItems.forEach(function (item) {
+    var btn = item.querySelector(".faq-question");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var isOpen = item.classList.contains("is-open");
 
-            inputs.forEach inp => {
-                if (!inp.value.trim()) {
-                    valid = false;
-                    inp.style.borderColor = '#e74c3c';
-                } else {
-                    inp.style.borderColor = '';
-                }
-            };
+      faqItems.forEach(function (other) {
+        other.classList.remove("is-open");
+        var otherBtn = other.querySelector(".faq-question");
+        if (otherBtn) otherBtn.setAttribute("aria-expanded", "false");
+      });
 
-            if (valid) {
-                alert('Thank you! We will get back to you shortly.');
-                form.reset();
-            } else {
-                alert('Please fill in all required fields.');
-            }
-        });
+      if (!isOpen) {
+        item.classList.add("is-open");
+        btn.setAttribute("aria-expanded", "true");
+      }
+    });
+  });
+
+  /* ---------- Contact form validation + WhatsApp/mailto handoff ---------- */
+  var form = document.getElementById("contact-form");
+  if (form) {
+    var noteEl = document.getElementById("form-note");
+
+    function setError(fieldId, message) {
+      var errEl = document.getElementById("err-" + fieldId);
+      if (errEl) errEl.textContent = message || "";
     }
-});
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
+    function isValidPhone(value) {
+      var digits = value.replace(/\D/g, "");
+      return digits.length >= 10;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var name = form.name.value.trim();
+      var phone = form.phone.value.trim();
+      var email = form.email.value.trim();
+      var service = form.service.value;
+      var message = form.message.value.trim();
+
+      var valid = true;
+      setError("name", "");
+      setError("phone", "");
+      setError("email", "");
+      setError("service", "");
+
+      if (!name) {
+        setError("name", "Please enter your name.");
+        valid = false;
+      }
+      if (!phone || !isValidPhone(phone)) {
+        setError("phone", "Please enter a valid phone number.");
+        valid = false;
+      }
+      if (email && !isValidEmail(email)) {
+        setError("email", "Please enter a valid email address.");
+        valid = false;
+      }
+      if (!service) {
+        setError("service", "Please select a service.");
+        valid = false;
+      }
+
+      if (!valid) {
+        if (noteEl) {
+          noteEl.textContent = "Please fix the highlighted fields.";
+          noteEl.style.color = "#B3422A";
+        }
+        return;
+      }
+
+      var lines = [
+        "New enquiry from ddprime.in",
+        "Name: " + name,
+        "Phone: " + phone,
+        email ? "Email: " + email : null,
+        "Service: " + service,
+        message ? "Message: " + message : null
+      ].filter(Boolean);
+
+      var waText = encodeURIComponent(lines.join("\n"));
+      var waUrl = "https://wa.me/917597616454?text=" + waText;
+
+      if (noteEl) {
+        noteEl.textContent = "Opening WhatsApp with your details filled in\u2026";
+        noteEl.style.color = "#0B6B6B";
+      }
+
+      window.open(waUrl, "_blank", "noopener");
+      form.reset();
+    });
+  }
+})();
