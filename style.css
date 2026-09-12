@@ -1,4 +1,3 @@
-
 /* ==========================================================================
    DD PRIME Solutions — stylesheet
    Palette: deep ink teal + warm gold accent, cream surface
@@ -133,15 +132,15 @@ input, select, textarea { font-family: inherit; font-size: 1rem; }
 .brand-mark {
   width: 42px;
   height: 42px;
-  border-radius: 50%;
-  overflow: hidden;
+  border-radius: 0;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--teal-deep);
+  background: none;
   flex-shrink: 0;
 }
-.brand-logo-img { width: 100%; height: 100%; object-fit: cover; }
+.brand-logo-img { width: 100%; height: 100%; object-fit: contain; }
 .brand-seal {
   color: var(--white);
   font-family: var(--font-display);
