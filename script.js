@@ -1,139 +1,74 @@
 (function () {
-  "use strict";
+  'use strict';
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+  var WA = '917597616454';
 
-  /* ---------- Footer year ---------- */
-  var yearEl = document.getElementById("year");
-  if (yearEl) yearEl.textContent = new Date().getFullYear();
+  var y = $('#year'); if (y) y.textContent = new Date().getFullYear();
 
-  /* ---------- Header scroll state ---------- */
-  var header = document.getElementById("site-header");
-  function onScroll() {
-    if (!header) return;
-    header.classList.toggle("is-scrolled", window.scrollY > 8);
-  }
-  onScroll();
-  window.addEventListener("scroll", onScroll, { passive: true });
+  // Mobile navigation
+  var toggle = $('#toggle'), nav = $('#nav');
+  function closeNav() { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); }
+  toggle.addEventListener('click', function () {
+    var open = nav.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', String(open));
+  });
+  $$('a', nav).forEach(function (a) { a.addEventListener('click', closeNav); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeNav(); });
 
-  /* ---------- Mobile nav toggle ---------- */
-  var navToggle = document.getElementById("nav-toggle");
-  var mainNav = document.getElementById("main-nav");
-  if (navToggle && mainNav) {
-    navToggle.addEventListener("click", function () {
-      var isOpen = mainNav.classList.toggle("is-open");
-      navToggle.setAttribute("aria-expanded", String(isOpen));
-      navToggle.setAttribute("aria-label", isOpen ? "Close menu" : "Open menu");
-      document.body.style.overflow = isOpen ? "hidden" : "";
-    });
-
-    mainNav.querySelectorAll("a").forEach(function (link) {
-      link.addEventListener("click", function () {
-        mainNav.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
-        navToggle.setAttribute("aria-label", "Open menu");
-        document.body.style.overflow = "";
+  // Active nav link on scroll
+  var links = $$('a', nav);
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          links.forEach(function (a) { a.classList.toggle('active', a.getAttribute('href') === '#' + en.target.id); });
+        }
       });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    ['top', 'services', 'about', 'portfolio', 'pricing', 'contact'].forEach(function (id) {
+      var el = document.getElementById(id); if (el) io.observe(el);
     });
   }
 
-  /* ---------- FAQ accordion ---------- */
-  var faqItems = document.querySelectorAll(".faq-item");
-  faqItems.forEach(function (item) {
-    var btn = item.querySelector(".faq-question");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var isOpen = item.classList.contains("is-open");
-
-      faqItems.forEach(function (other) {
-        other.classList.remove("is-open");
-        var otherBtn = other.querySelector(".faq-question");
-        if (otherBtn) otherBtn.setAttribute("aria-expanded", "false");
-      });
-
-      if (!isOpen) {
-        item.classList.add("is-open");
-        btn.setAttribute("aria-expanded", "true");
-      }
+  // FAQ accordion
+  $$('.faq button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+      document.getElementById(btn.getAttribute('aria-controls')).hidden = open;
     });
   });
 
-  /* ---------- Contact form validation + WhatsApp/mailto handoff ---------- */
-  var form = document.getElementById("contact-form");
-  if (form) {
-    var noteEl = document.getElementById("form-note");
+  // Pre-select service from card links
+  var select = $('#service');
+  $$('[data-service]').forEach(function (a) {
+    a.addEventListener('click', function () { select.value = a.getAttribute('data-service'); });
+  });
 
-    function setError(fieldId, message) {
-      var errEl = document.getElementById("err-" + fieldId);
-      if (errEl) errEl.textContent = message || "";
-    }
-
-    function isValidEmail(value) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-    }
-
-    function isValidPhone(value) {
-      var digits = value.replace(/\D/g, "");
-      return digits.length >= 10;
-    }
-
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      var name = form.name.value.trim();
-      var phone = form.phone.value.trim();
-      var email = form.email.value.trim();
-      var service = form.service.value;
-      var message = form.message.value.trim();
-
-      var valid = true;
-      setError("name", "");
-      setError("phone", "");
-      setError("email", "");
-      setError("service", "");
-
-      if (!name) {
-        setError("name", "Please enter your name.");
-        valid = false;
-      }
-      if (!phone || !isValidPhone(phone)) {
-        setError("phone", "Please enter a valid phone number.");
-        valid = false;
-      }
-      if (email && !isValidEmail(email)) {
-        setError("email", "Please enter a valid email address.");
-        valid = false;
-      }
-      if (!service) {
-        setError("service", "Please select a service.");
-        valid = false;
-      }
-
-      if (!valid) {
-        if (noteEl) {
-          noteEl.textContent = "Please fix the highlighted fields.";
-          noteEl.style.color = "#B3422A";
-        }
-        return;
-      }
-
-      var lines = [
-        "New enquiry from ddprime.in",
-        "Name: " + name,
-        "Phone: " + phone,
-        email ? "Email: " + email : null,
-        "Service: " + service,
-        message ? "Message: " + message : null
-      ].filter(Boolean);
-
-      var waText = encodeURIComponent(lines.join("\n"));
-      var waUrl = "https://wa.me/917597616454?text=" + waText;
-
-      if (noteEl) {
-        noteEl.textContent = "Opening WhatsApp with your details filled in\u2026";
-        noteEl.style.color = "#0B6B6B";
-      }
-
-      window.open(waUrl, "_blank", "noopener");
-      form.reset();
-    });
+  // Form: validate, then open WhatsApp with the details (no backend exists)
+  var form = $('#form'), note = $('#note');
+  function setErr(id, msg) {
+    var f = document.getElementById(id), e = $('#e-' + id);
+    e.textContent = msg; f.setAttribute('aria-invalid', msg ? 'true' : 'false');
+    if (msg) f.setAttribute('aria-describedby', 'e-' + id); else f.removeAttribute('aria-describedby');
+    return !msg;
   }
-})();
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('#name').value.trim(), email = $('#email').value.trim(),
+        phone = $('#phone').value.replace(/[\s-]/g, ''), service = select.value,
+        msg = $('#message').value.trim();
+    var ok = [
+      setErr('name', name ? '' : 'Please enter your name.'),
+      setErr('phone', /^(\+?91)?[6-9]\d{9}$/.test(phone) ? '' : 'Enter a valid 10-digit Indian mobile number.'),
+      setErr('email', !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Enter a valid email address.'),
+      setErr('service', service ? '' : 'Please select a service.')
+    ].every(Boolean);
+    if (!ok) { var bad = $('[aria-invalid=true]', form); if (bad) bad.focus(); return; }
+    var text = 'Hi DD PRIME, I would like to enquire about ' + service + '.\nName: ' + name +
+      '\nPhone: ' + phone + (email ? '\nEmail: ' + email : '') + (msg ? '\nMessage: ' + msg : '');
+    window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    note.textContent = 'WhatsApp should now be open. Press Send there to deliver your enquiry.';
+  });
+}());
