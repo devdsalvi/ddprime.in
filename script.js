@@ -31,6 +31,20 @@
     });
   }
 
+  // Product details dialog
+  var productDialog = $('#productDialog');
+  var detailsBtn = $('#productDetailsBtn');
+  var closeDetailsBtn = $('#closeProductDialog');
+  if (productDialog && detailsBtn && closeDetailsBtn) {
+    detailsBtn.addEventListener('click', function () {
+      if (typeof productDialog.showModal === 'function') productDialog.showModal();
+    });
+    closeDetailsBtn.addEventListener('click', function () { productDialog.close(); });
+    productDialog.addEventListener('click', function (e) {
+      if (e.target === productDialog) productDialog.close();
+    });
+  }
+
   // FAQ accordion
   $$('.faq button').forEach(function (btn) {
     btn.addEventListener('click', function () {
