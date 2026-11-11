@@ -209,3 +209,9 @@ a{color:var(--blue)}
 .shopify-hero-results figure:first-child{grid-column:1/-1}
 .shopify-hero-results img{aspect-ratio:1.75;object-fit:contain}
 .shopify-hero-results figcaption{display:none}
+
+/* Make dashboard screenshots easier to read */
+.shopify-results-grid{grid-template-columns:minmax(0,1fr);max-width:1100px;margin-inline:auto}
+.shopify-results-grid img{width:100%;height:auto;aspect-ratio:auto;object-fit:contain}
+.screenshot-fullsize{display:block;cursor:zoom-in}
+.shopify-hero-results{max-width:560px}
