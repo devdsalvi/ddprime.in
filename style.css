@@ -197,3 +197,10 @@ a{color:var(--blue)}
  .shopify-product-visual{width:min(100%,390px)}
  .shopify-results-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* Single-column layouts after removing the Shopify guide cover */
+@media(min-width:700px){
+ .shopify-hero-grid{grid-template-columns:minmax(0,760px);justify-content:center}
+ .product-feature-card{grid-template-columns:minmax(0,1fr)}
+}
