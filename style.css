@@ -199,8 +199,6 @@ a{color:var(--blue)}
 }
 
 
-/* Single-column layouts after removing the Shopify guide cover */
-@media(min-width:700px){
- .shopify-hero-grid{grid-template-columns:minmax(0,760px);justify-content:center}
- .product-feature-card{grid-template-columns:minmax(0,1fr)}
-}
+
+/* Keep the text-only 369 workbook card in a single column. */
+.product-feature-card{grid-template-columns:minmax(0,1fr)}
