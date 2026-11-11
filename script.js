@@ -26,7 +26,7 @@
         }
       });
     }, { rootMargin: '-45% 0px -50% 0px' });
-    ['top', 'services', 'about', 'portfolio', 'pricing', 'contact'].forEach(function (id) {
+    ['top', 'digital-products', 'services', 'about', 'portfolio', 'pricing', 'contact'].forEach(function (id) {
       var el = document.getElementById(id); if (el) io.observe(el);
     });
   }
