@@ -202,3 +202,10 @@ a{color:var(--blue)}
 
 /* Keep the text-only 369 workbook card in a single column. */
 .product-feature-card{grid-template-columns:minmax(0,1fr)}
+
+/* Results screenshot collage in the Shopify hero */
+.shopify-hero-results{width:min(100%,430px);justify-self:center;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.shopify-hero-results figure{padding:6px}
+.shopify-hero-results figure:first-child{grid-column:1/-1}
+.shopify-hero-results img{aspect-ratio:1.75;object-fit:contain}
+.shopify-hero-results figcaption{display:none}
